@@ -2,9 +2,10 @@
 const input = document.getElementById("taskInput");
 const addBtn = document.getElementById('addBtn');
 const taskList = document.getElementById("taskList");
-
+//localStorage.removeItem('tasks');
 // Loading tasks from localStorage
 let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+console.log(tasks)
 renderTasks();
 
 addBtn.addEventListener('click', addTask);
@@ -14,7 +15,7 @@ input.addEventListener('keydown', (e) => {
 
 // Save function
 function saveTasks() {
-    localStorage.setItem('tasks', JSON.stringify('tasks'));
+    localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
 // Task display function
@@ -29,7 +30,7 @@ function renderTasks() {
         }
 
         li.addEventListener('click', () => {
-            task[index].completed = !task[index].completed;
+            tasks[index].completed = !tasks[index].completed;
             saveTasks();
             renderTasks();
         });
@@ -38,7 +39,7 @@ function renderTasks() {
         deleteBtn.textContent = 'Delete';
 
         deleteBtn.addEventListener('click', () => {
-            task.splice(index, 1);
+            tasks.splice(index, 1);
             saveTasks();
             renderTasks();
         });
