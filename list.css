@@ -10,3 +10,7 @@ button {
     margin-left: 15px;
     cursor: pointer;
 }
+
+.clearBtn {
+    display: none;
+}
