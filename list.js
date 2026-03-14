@@ -6,6 +6,7 @@ const all = document.getElementById('all');
 const active = document.getElementById('active');
 const completed = document.getElementById('completed');
 const clearBtn = document.getElementById('clearBtn');
+const template = document.getElementById('taskTemplate');
 
 //localStorage.removeItem('tasks');
 // Loading tasks from localStorage
@@ -47,21 +48,26 @@ function renderTasks() {
 
     const fragment = document.createDocumentFragment();
     tasks.forEach((task, index) => {
-        const li = document.createElement('li');
+        const clone = template.content.cloneNode(true);
+        //const li = document.createElement('li');
+        //li.dataset.index = index;
+        // const span = document.createElement('span');
+        //span.textContent = task.text;
+        const li = clone.querySelector('li');
+        const span = clone.querySelector('.taskText');
         li.dataset.index = index;
-        const span = document.createElement('span');
         span.textContent = task.text;
 
         if (task.completed) {
             li.classList.add('completed');
         }
 
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Delete';
-        deleteBtn.className = 'deleteBtn'
+        // const deleteBtn = document.createElement('button');
+        // deleteBtn.textContent = 'Delete';
+        // deleteBtn.className = 'deleteBtn'
 
-        li.appendChild(span);
-        li.appendChild(deleteBtn);
+        // li.appendChild(span);
+        // li.appendChild(deleteBtn);
         fragment.appendChild(li);
     });
     taskList.appendChild(fragment);
