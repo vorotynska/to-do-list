@@ -44,11 +44,13 @@ function addTask() {
 // Task display function
 function renderTasks() {
     taskList.innerHTML = '';
+
+    const fragment = document.createDocumentFragment();
     tasks.forEach((task, index) => {
         const li = document.createElement('li');
-
         li.dataset.index = index;
-        li.textContent = task.text;
+        const span = document.createElement('span');
+        span.textContent = task.text;
 
         if (task.completed) {
             li.classList.add('completed');
@@ -58,9 +60,11 @@ function renderTasks() {
         deleteBtn.textContent = 'Delete';
         deleteBtn.className = 'deleteBtn'
 
+        li.appendChild(span);
         li.appendChild(deleteBtn);
-        taskList.appendChild(li);
+        fragment.appendChild(li);
     });
+    taskList.appendChild(fragment);
     infoTasks();
 }
 
@@ -69,9 +73,10 @@ function handleListClick(e) {
     const li = e.target.closest('li');
     if (!li) return;
 
-    const index = li.dataset.index;
+    const index = Number(li.dataset.index);
 
     if (e.target.classList.contains('deleteBtn')) {
+        e.stopPropagation();
         tasks.splice(index, 1);
     } else {
         tasks[index].completed = !tasks[index].completed
@@ -81,12 +86,10 @@ function handleListClick(e) {
     renderTasks();
 }
 
+// Deleting a list of completed tasks
 function clearCompleted() {
-    tasks.forEach((task, index) => {
-        if (task.completed) {
-            tasks.splice(index, 1);
-        }
-    })
+    tasks = tasks.filter(task => !task.completed);
+
     clearBtn.style.display = 'none';
     saveTasks();
     renderTasks();
