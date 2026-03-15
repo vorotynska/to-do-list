@@ -17,13 +17,21 @@ const all = document.querySelector(SELECROTS.all);
 const active = document.querySelector(SELECROTS.active);
 const completed = document.querySelector(SELECROTS.completed);
 const clearBtn = document.querySelector(SELECROTS.clearBtn);
+const filterBtns = document.querySelectorAll('.filter');
 const template = document.getElementById('taskTemplate');
+let currentFilter = 'all';
+let dragIndex = null;
 
 //localStorage.removeItem('tasks');
 // Loading tasks from localStorage
 let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
-renderTasks()
+init();
+
+function init() {
+    renderTasks();
+    updateInfo();
+}
 
 addBtn.addEventListener('click', addTask);
 input.addEventListener('keydown', (e) => {
@@ -31,6 +39,26 @@ input.addEventListener('keydown', (e) => {
 });
 taskList.addEventListener('click', handleListClick);
 clearBtn.addEventListener('click', clearCompleted);
+
+// UI filters
+filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        currentFilter = btn.dataset.filter;
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        renderTasks();
+    });
+});
+
+// Drag & Drop
+taskList.addEventListener('dragstart', e => {
+    dragIndex = e.target.dataset.index;
+})
+taskList.addEventListener('dragover', e => {
+    e.preventDefault();
+});
+taskList.addEventListener('drop', draggedLi)
 
 // Save function
 function saveTasks() {
@@ -47,42 +75,44 @@ function addTask() {
         completed: false
     });
 
-    saveTasks();
-    renderTasks();
     input.value = '';
     input.focus();
+
+    saveTasks();
+    renderTasks();
 }
 
 // Task display function
 function renderTasks() {
     taskList.replaceChildren();
+    let filtered = tasks;
+
+    if (currentFilter === 'active') {
+        filtered = tasks.filter(t => !t.completed);
+    }
+
+    if (currentFilter === 'completed') {
+        filtered = tasks.filter(t => t.completed);
+    }
 
     const fragment = document.createDocumentFragment();
-    tasks.forEach((task, index) => {
+    filtered.forEach((task, index) => {
         const clone = template.content.cloneNode(true);
-        //const li = document.createElement('li');
-        //li.dataset.index = index;
-        // const span = document.createElement('span');
-        //span.textContent = task.text;
         const li = clone.querySelector('li');
+        li.draggable = true;
         const span = clone.querySelector('.taskText');
         li.dataset.index = index;
         span.textContent = task.text;
+        span.addEventListener('dbclick', () => editTask(span, index));
 
         if (task.completed) {
             li.classList.add('completed');
         }
 
-        // const deleteBtn = document.createElement('button');
-        // deleteBtn.textContent = 'Delete';
-        // deleteBtn.className = 'deleteBtn'
-
-        // li.appendChild(span);
-        // li.appendChild(deleteBtn);
         fragment.appendChild(li);
     });
     taskList.appendChild(fragment);
-    infoTasks();
+    updateInfo();
 }
 
 // One handler insted of many
@@ -103,23 +133,56 @@ function handleListClick(e) {
     renderTasks();
 }
 
-// Deleting a list of completed tasks
-function clearCompleted() {
-    tasks = tasks.filter(task => !task.completed);
+// Drop & Drag
+function draggedLi(e) {
+    const li = e.target.closest('li');
+    if (!li) return;
+    const dropIndex = li.dataset.index;
+    const draggedTask = tasks.splice(dragIndex, 1)[0];
+    tasks.splace(dropIndex, 0, draggedTask);
 
-    clearBtn.style.display = 'none';
     saveTasks();
     renderTasks();
 }
 
+// Deleting a list of completed tasks
+function clearCompleted() {
+    tasks = tasks.filter(task => !task.completed);
+
+    saveTasks();
+    renderTasks();
+}
+
+// Function: double click you can change the task text
+function editTask(span, index) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = tasks[index].text;
+
+    span.replaceWith(input);
+    input.focus();
+
+    input.addEventListener('blur', saveEdit);
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') saveEdit();
+    });
+
+    function saveEdit() {
+        const newText = input.value.trim();
+        if (newText) {
+            tasks[index].text = newText;
+        }
+        saveTasks();
+        renderTasks();
+    }
+}
+
 // General information about tasks
-function infoTasks() {
-    let completedTasks = tasks.filter((task) => task.completed);
-    let activeTasks = tasks.length - completedTasks.length;
+function updateInfo() {
+    let completedTasks = tasks.filter((task) => task.completed).length;
+    let activeTasks = tasks.length - completedTasks;
 
     all.textContent = `All: ${tasks.length}`;
-    completed.textContent = `Completed: ${completedTasks.length}`;
+    completed.textContent = `Completed: ${completedTasks}`;
     active.textContent = `Active: ${activeTasks}`;
-
-    if (completedTasks.length > 0) clearBtn.style.display = 'block';
 }

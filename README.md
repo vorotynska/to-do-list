@@ -1,4 +1,5 @@
 # to-do-list
+SELECTORS
 DOM manipulation
 event delegation
 localStorege

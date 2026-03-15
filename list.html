@@ -8,16 +8,32 @@
     <script src="./list.js" defer></script>
 </head>
 <body>
+  <div class="app">
     <h1>My Task</h1>
-    <input type="text" id="taskInput" placeholder="Enter a task" name="name" />
-    <button type="button" id="addBtn">Add</button>
+
+    <div class="input-group">
+      <input type="text" id="taskInput" placeholder="Enter a task">
+      <button type="button" id="addBtn">Add</button>
+    </div>
+
     <ol id="taskList"></ol>
-    <button type="button" id="clearBtn" class="clearBtn">Clear completed</button>
-    <div>
+
+    <div class="controls">
+      <div class="filters">
+        <button type="button" data-filter="all" class="filter active">All</button>
+        <button type="button" data-filter="active" class="filter">Active</button>
+        <button type="button" data-filter="completed" class="filter">Completed</button>
+      </div>
+      <button type="button" id="clearBtn" class="clearBtn">Clear completed</button>
+    </div>
+    
+    <div class="info">
         <p id="all" class="info"></p>
         <p id="active" class="info"></p>
         <p id="completed" class="info"></p>
     </div>
+  </div>
+ 
     <template id="taskTemplate">
       <li>
         <span class="taskText"></span>
