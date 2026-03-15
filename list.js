@@ -1,11 +1,22 @@
 // list.js
-const input = document.getElementById("taskInput");
-const addBtn = document.getElementById('addBtn');
-const taskList = document.getElementById("taskList");
-const all = document.getElementById('all');
-const active = document.getElementById('active');
-const completed = document.getElementById('completed');
-const clearBtn = document.getElementById('clearBtn');
+const SELECROTS = {
+    input: '#taskInput',
+    addBtn: '#addBtn',
+    taskList: '#taskList',
+    all: '#all',
+    active: '#active',
+    completed: '#completed',
+    clearBtn: '#clearBtn',
+
+}
+
+const input = document.querySelector(SELECROTS.input);
+const addBtn = document.querySelector(SELECROTS.addBtn);
+const taskList = document.querySelector(SELECROTS.taskList);
+const all = document.querySelector(SELECROTS.all);
+const active = document.querySelector(SELECROTS.active);
+const completed = document.querySelector(SELECROTS.completed);
+const clearBtn = document.querySelector(SELECROTS.clearBtn);
 const template = document.getElementById('taskTemplate');
 
 //localStorage.removeItem('tasks');
@@ -44,7 +55,7 @@ function addTask() {
 
 // Task display function
 function renderTasks() {
-    taskList.innerHTML = '';
+    taskList.replaceChildren();
 
     const fragment = document.createDocumentFragment();
     tasks.forEach((task, index) => {
