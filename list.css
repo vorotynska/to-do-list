@@ -71,8 +71,21 @@ li {
 }
 
 .new-task {
-    background: #f5e8be;
+    background: #fff3cd;
     transition: background 1s;
+}
+
+.empty {
+    text-align: center;
+    color: gray;
+    margin: 15px 0;
+    display: none;
+}
+
+.error {
+    color: red;
+    font-size: 14px;
+    height: 16px;
 }
 
 /* Dark Mode */

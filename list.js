@@ -9,6 +9,8 @@ const SELECTORS = {
     clearBtn: '#clearBtn',
     themeToggle: '#themeToggle',
     clearInput: '#clearInput',
+    emptyState: '#emptyState',
+    errorMsg: '#errorMsg',
 }
 
 const input = document.querySelector(SELECTORS.input);
@@ -20,6 +22,8 @@ const completed = document.querySelector(SELECTORS.completed);
 const clearBtn = document.querySelector(SELECTORS.clearBtn);
 const themeBtn = document.querySelector(SELECTORS.themeToggle);
 const clearInputBtn = document.querySelector(SELECTORS.clearInput);
+const emptyState = document.querySelector(SELECTORS.emptyState);
+const errorMsg = document.querySelector(SELECTORS.errorMsg);
 
 const filterBtns = document.querySelectorAll('.filter');
 const template = document.getElementById('taskTemplate');
@@ -85,7 +89,11 @@ function renderTasks() {
 // Add task
 function addTask() {
     const text = input.value.trim();
-    if (text === '') return alert('Ensure you input a value in field');
+    if (text === '') {
+        errorMsg.textContent = 'Please enter a task';
+        return;
+    }
+    errorMsg.textContent = '';
 
     tasks.push({
         text,
@@ -183,12 +191,27 @@ function updateInfo() {
     all.textContent = `All: ${tasks.length}`;
     completed.textContent = `Completed: ${completedTasks}`;
     active.textContent = `Active: ${activeTasks}`;
+    noTasks();
 }
 
+// message 'No tasks yet'
+function noTasks() {
+    if (tasks.length === 0) {
+        emptyState.style.display = 'block'
+    } else {
+        emptyState.style.display = 'none'
+    }
+}
+
+// add task
 addBtn.addEventListener('click', addTask);
 input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') addTask();
 });
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'Enter') addTask();
+});
+
 taskList.addEventListener('click', handleListClick);
 clearBtn.addEventListener('click', clearCompleted);
 clearInputBtn.addEventListener('click', clearInput);
