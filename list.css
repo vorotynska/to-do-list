@@ -70,6 +70,22 @@ li {
     color: #555;
 }
 
-/* .clearBtn {
-    display: none;
-} */
+/* Dark Mode */
+body.dark {
+    background: #1e1e1e;
+    color: white;
+}
+
+body.dark .app {
+    background: #2a2a2a;
+}
+
+body.dark input {
+    background: #333;
+    color: white;
+}
+
+body.dark button {
+    background: #444;
+    color: white;
+}
