@@ -7,7 +7,8 @@ const SELECTORS = {
     active: '#active',
     completed: '#completed',
     clearBtn: '#clearBtn',
-    themeToggle: '#themeToggle'
+    themeToggle: '#themeToggle',
+    clearInput: '#clearInput',
 }
 
 const input = document.querySelector(SELECTORS.input);
@@ -18,6 +19,7 @@ const active = document.querySelector(SELECTORS.active);
 const completed = document.querySelector(SELECTORS.completed);
 const clearBtn = document.querySelector(SELECTORS.clearBtn);
 const themeBtn = document.querySelector(SELECTORS.themeToggle);
+const clearInputBtn = document.querySelector(SELECTORS.clearInput);
 
 const filterBtns = document.querySelectorAll('.filter');
 const template = document.getElementById('taskTemplate');
@@ -57,18 +59,22 @@ function renderTasks() {
     }
 
     const fragment = document.createDocumentFragment();
-    filtered.forEach((task, index) => {
+    filtered.forEach((task) => {
+        const index = tasks.indexOf(task);
         const clone = template.content.cloneNode(true);
         const li = clone.querySelector('li');
-        li.draggable = true;
-        const span = clone.querySelector('.taskText');
         li.dataset.index = index;
+        li.draggable = true;
+
+        const span = clone.querySelector('.taskText');
         span.textContent = task.text;
         span.addEventListener('dblclick', () => editTask(span, index));
 
         if (task.completed) {
             li.classList.add('completed');
         }
+
+        if (index === tasks.length - 1) highLightingNewTask(li)
 
         fragment.appendChild(li);
     });
@@ -93,11 +99,16 @@ function addTask() {
     renderTasks();
 }
 
+// Clear input
+function clearInput() {
+    input.value = '';
+    input.focus();
+}
+
 // One handler insted of many
 function handleListClick(e) {
     const li = e.target.closest('li');
     if (!li) return;
-
     const index = Number(li.dataset.index);
 
     if (e.target.classList.contains('deleteBtn')) {
@@ -156,6 +167,14 @@ function editTask(span, index) {
     }
 }
 
+// Highlighting a new task
+function highLightingNewTask(li) {
+    li.classList.add('new-task');
+    setTimeout(() => {
+        li.classList.remove('new-task');
+    }, 800);
+}
+
 // General information about tasks
 function updateInfo() {
     let completedTasks = tasks.filter((task) => task.completed).length;
@@ -172,6 +191,7 @@ input.addEventListener('keydown', (e) => {
 });
 taskList.addEventListener('click', handleListClick);
 clearBtn.addEventListener('click', clearCompleted);
+clearInputBtn.addEventListener('click', clearInput);
 
 // UI filters
 filterBtns.forEach(btn => {

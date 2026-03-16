@@ -70,6 +70,11 @@ li {
     color: #555;
 }
 
+.new-task {
+    background: #f5e8be;
+    transition: background 1s;
+}
+
 /* Dark Mode */
 body.dark {
     background: #1e1e1e;
