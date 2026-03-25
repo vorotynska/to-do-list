@@ -11,6 +11,8 @@ const SELECTORS = {
     clearInput: '#clearInput',
     emptyState: '#emptyState',
     errorMsg: '#errorMsg',
+    searchInput: '#searchInput',
+    progressBar: '#progressBar',
 }
 
 const input = document.querySelector(SELECTORS.input);
@@ -24,11 +26,14 @@ const themeBtn = document.querySelector(SELECTORS.themeToggle);
 const clearInputBtn = document.querySelector(SELECTORS.clearInput);
 const emptyState = document.querySelector(SELECTORS.emptyState);
 const errorMsg = document.querySelector(SELECTORS.errorMsg);
+const searchInput = document.querySelector(SELECTORS.searchInput);
+const progressBar = document.querySelector(SELECTORS.progressBar);
 
 const filterBtns = document.querySelectorAll('.filter');
 const template = document.getElementById('taskTemplate');
 let currentFilter = 'all';
 let dragIndex = null;
+let searchText = '';
 
 //localStorage.removeItem('tasks');
 // Loading tasks from localStorage
@@ -54,12 +59,18 @@ function renderTasks() {
     taskList.replaceChildren();
     let filtered = tasks;
 
+    // Filters
     if (currentFilter === 'active') {
         filtered = tasks.filter(t => !t.completed);
     }
 
     if (currentFilter === 'completed') {
         filtered = tasks.filter(t => t.completed);
+    }
+
+    // Search
+    if (searchText) {
+        filtered = tasks.filter(task => task.text.toLowerCase().includes(searchText));
     }
 
     const fragment = document.createDocumentFragment();
@@ -191,6 +202,10 @@ function updateInfo() {
     all.textContent = `All: ${tasks.length}`;
     completed.textContent = `Completed: ${completedTasks}`;
     active.textContent = `Active: ${activeTasks}`;
+
+    // progressBar
+    const percent = tasks.length === 0 ? 0 : (completedTasks / tasks.length) * 100;
+    progressBar.style.width = percent + '%';
     noTasks();
 }
 
@@ -241,3 +256,9 @@ themeBtn.addEventListener('click', () => {
     document.body.classList.toggle('dark');
     localStorage.setItem('theme', document.body.classList.contains('dark'));
 });
+
+// Search task
+searchInput.addEventListener('input', (e) => {
+    searchText = e.target.value.toLowerCase();
+    renderTasks();
+})

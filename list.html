@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rock, Paper, Scissors Game</title>
-    <link rel="stylesheet" href="./list.css">
-    <script src="./list.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rock, Paper, Scissors Game</title>
+  <link rel="stylesheet" href="./list.css">
+  <script src="./list.js" defer></script>
 </head>
+
 <body>
   <div class="app">
     <button type="button" id="themeToggle">🌙</button>
@@ -17,8 +19,13 @@
       <button type="button" id="addBtn">Add</button>
       <button type="button" id="clearInput">Clear Input</button>
     </div>
-    
+
+    <input type="text" name="search" id="searchInput" placeholder="Search tasks">
+
     <p id="errorMsg" class="error"></p>
+    <div class="progress">
+      <div id="progressBar"></div>
+    </div>
     <ol id="taskList"></ol>
     <p id="emptyState" class="empty">No tasks yet</p>
 
@@ -30,19 +37,20 @@
       </div>
       <button type="button" id="clearBtn" class="clearBtn">Clear completed</button>
     </div>
-    
+
     <div class="info">
-        <p id="all" class="info"></p>
-        <p id="active" class="info"></p>
-        <p id="completed" class="info"></p>
+      <p id="all" class="info"></p>
+      <p id="active" class="info"></p>
+      <p id="completed" class="info"></p>
     </div>
   </div>
- 
-    <template id="taskTemplate">
-      <li>
-        <span class="taskText"></span>
-        <button class="deleteBtn">Delete</button>
-      </li>
-    </template>
+
+  <template id="taskTemplate">
+    <li>
+      <span class="taskText"></span>
+      <button class="deleteBtn">Delete</button>
+    </li>
+  </template>
 </body>
+
 </html>
