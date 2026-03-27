@@ -11,10 +11,11 @@
 
 <body>
   <div class="app">
-    <button type="button" id="themeToggle">🌙</button>
+    <button type="button" id="themeToggle" aria-label="Toggle dark mode">🌙</button>
     <h1>My Task</h1>
 
     <div class="input-group">
+      <label for="taskInput">New task</label>
       <input type="text" id="taskInput" placeholder="Enter a task">
       <button type="button" id="addBtn">Add</button>
       <button type="button" id="clearInput">Clear Input</button>
@@ -22,12 +23,13 @@
 
     <input type="text" name="search" id="searchInput" placeholder="Search tasks">
 
-    <p id="errorMsg" class="error"></p>
+    <p id="errorMsg" class="error" aria-live="assertive"></p>
     <div class="progress">
       <div id="progressBar"></div>
     </div>
     <ol id="taskList"></ol>
     <p id="emptyState" class="empty">No tasks yet</p>
+    <p id="warning" class="warning" aria-live="polite"></p>
 
     <div class="controls">
       <div class="filters">

@@ -13,6 +13,7 @@ const SELECTORS = {
     errorMsg: '#errorMsg',
     searchInput: '#searchInput',
     progressBar: '#progressBar',
+    warning: '#warning',
 }
 
 const input = document.querySelector(SELECTORS.input);
@@ -28,6 +29,7 @@ const emptyState = document.querySelector(SELECTORS.emptyState);
 const errorMsg = document.querySelector(SELECTORS.errorMsg);
 const searchInput = document.querySelector(SELECTORS.searchInput);
 const progressBar = document.querySelector(SELECTORS.progressBar);
+const warning = document.querySelector(SELECTORS.warning);
 
 const filterBtns = document.querySelectorAll('.filter');
 const template = document.getElementById('taskTemplate');
@@ -113,6 +115,8 @@ function addTask() {
 
     input.value = '';
     input.focus();
+    // Announcement: task added
+    sessionWarning(warning, 'Task added');
 
     saveTasks();
     renderTasks();
@@ -133,6 +137,8 @@ function handleListClick(e) {
     if (e.target.classList.contains('deleteBtn')) {
         e.stopPropagation();
         tasks.splice(index, 1);
+        // Announcement: task delete
+        sessionWarning(warning, 'Task deleted');
     } else {
         tasks[index].completed = !tasks[index].completed
     }
@@ -218,6 +224,25 @@ function noTasks() {
     }
 }
 
+// Announcement task status
+function sessionWarning(el, text) {
+    setTimeout(() => {
+        el.textContent = text;
+        el.classList.remove('fade-out')
+        el.classList.add('visible');
+    }, 150);
+
+    setTimeout(() => {
+        el.classList.add('fade-out');
+    }, 3000);
+
+    warning.addEventListener('transitioned', () => {
+        if (el.classList.contains('fade-out')) {
+            el.remove();
+        }
+    });
+};
+
 // add task
 addBtn.addEventListener('click', addTask);
 input.addEventListener('keydown', (e) => {
@@ -261,4 +286,4 @@ themeBtn.addEventListener('click', () => {
 searchInput.addEventListener('input', (e) => {
     searchText = e.target.value.toLowerCase();
     renderTasks();
-})
+});
