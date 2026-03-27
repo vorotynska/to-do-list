@@ -81,10 +81,19 @@ function renderTasks() {
         const clone = template.content.cloneNode(true);
         const li = clone.querySelector('li');
         li.dataset.index = index;
+        li.tabIndex = 0;
         li.draggable = true;
 
         const span = clone.querySelector('.taskText');
         span.textContent = task.text;
+
+        const deleteBtn = clone.querySelector('.deleteBtn');
+        deleteBtn.setAttribute('aria-label', `Delete task ${task.text}`);
+
+        const checkbox = clone.querySelector('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = task.completed;
+
         span.addEventListener('dblclick', () => editTask(span, index));
 
         if (task.completed) {
@@ -133,6 +142,7 @@ function handleListClick(e) {
     const li = e.target.closest('li');
     if (!li) return;
     const index = Number(li.dataset.index);
+    const checkbox = e.target.closest('input');
 
     if (e.target.classList.contains('deleteBtn')) {
         e.stopPropagation();
@@ -140,7 +150,8 @@ function handleListClick(e) {
         // Announcement: task delete
         sessionWarning(warning, 'Task deleted');
     } else {
-        tasks[index].completed = !tasks[index].completed
+        //tasks[index].completed = !tasks[index].completed
+        tasks[index].completed = checkbox.checked;
     }
 
     saveTasks();
@@ -211,6 +222,7 @@ function updateInfo() {
 
     // progressBar
     const percent = tasks.length === 0 ? 0 : (completedTasks / tasks.length) * 100;
+    progressBar.setAttribute('aria-valuenow', percent);
     progressBar.style.width = percent + '%';
     noTasks();
 }
@@ -259,8 +271,12 @@ clearInputBtn.addEventListener('click', clearInput);
 // UI filters
 filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
+        btn.setAttribute('aria-pressed', 'true');
         currentFilter = btn.dataset.filter;
-        filterBtns.forEach(b => b.classList.remove('active'));
+        filterBtns.forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-pressed', 'false');
+        });
         btn.classList.add('active');
 
         renderTasks();
