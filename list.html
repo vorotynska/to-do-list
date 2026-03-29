@@ -14,7 +14,10 @@
     <button type="button" id="themeToggle" aria-label="Toggle dark mode">🌙</button>
     <h1>My Task</h1>
 
-    <input type="text" name="search" id="searchInput" placeholder="Search tasks">
+    <div class="input-group">
+      <input type="text" name="search" id="searchInput" placeholder="Search tasks">
+      <button type="button" id="clearSearch">Clear search</button>
+    </div>
 
     <div class="input-group">
       <label for="taskInput">New task</label>
@@ -28,7 +31,8 @@
     <div class="progress">
       <div 
         id="progressBar"
-        role="progressBar"
+        role="progressbar"
+        title="Percentage of task completed"
         aria-valuemin="0"
         aria-valuemax="100"
         aria-valuenow="0"
@@ -50,10 +54,11 @@
     </div>
 
     <div class="info">
-      <p id="all" class="info"></p>
-      <p id="active" class="info"></p>
-      <p id="completed" class="info"></p>
+      <p id="all" class="info" aria-live="polite"></p>
+      <p id="active" class="info" aria-live="polite"></p>
+      <p id="completed" class="info" aria-live="polite"></p>
     </div>
+
   </div>
 
   <template id="taskTemplate">

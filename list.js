@@ -14,6 +14,7 @@ const SELECTORS = {
     searchInput: '#searchInput',
     progressBar: '#progressBar',
     warning: '#warning',
+    clearSearch: '#clearSearch',
 }
 
 const input = document.querySelector(SELECTORS.input);
@@ -30,12 +31,14 @@ const errorMsg = document.querySelector(SELECTORS.errorMsg);
 const searchInput = document.querySelector(SELECTORS.searchInput);
 const progressBar = document.querySelector(SELECTORS.progressBar);
 const warning = document.querySelector(SELECTORS.warning);
+const clearSearchBtn = document.querySelector(SELECTORS.clearSearch);
 
 const filterBtns = document.querySelectorAll('.filter');
 const template = document.getElementById('taskTemplate');
 let currentFilter = 'all';
 let dragIndex = null;
 let searchText = '';
+let lastMessage = '';
 
 //localStorage.removeItem('tasks');
 // Loading tasks from localStorage
@@ -73,6 +76,7 @@ function renderTasks() {
     // Search
     if (searchText) {
         filtered = tasks.filter(task => task.text.toLowerCase().includes(searchText));
+        announceSearchResults(filtered);
     }
 
     const fragment = document.createDocumentFragment();
@@ -92,9 +96,10 @@ function renderTasks() {
 
         const checkbox = clone.querySelector('input');
         checkbox.type = 'checkbox';
+        checkbox.setAttribute('aria-label', `Mark task ${task.text} as completed`);
         checkbox.checked = task.completed;
 
-        span.addEventListener('dblclick', () => editTask(span, index));
+        //span.addEventListener('dblclick', () => editTask(span, index));
 
         if (task.completed) {
             li.classList.add('completed');
@@ -137,6 +142,15 @@ function clearInput() {
     input.focus();
 }
 
+// Clear search input
+function clearSearchInput() {
+    searchInput.value = '';
+    searchText = '';
+    renderTasks();
+
+    sessionWarning(warning, 'Search cleared');
+}
+
 // One handler insted of many
 function handleListClick(e) {
     const li = e.target.closest('li');
@@ -150,7 +164,6 @@ function handleListClick(e) {
         // Announcement: task delete
         sessionWarning(warning, 'Task deleted');
     } else {
-        //tasks[index].completed = !tasks[index].completed
         tasks[index].completed = checkbox.checked;
     }
 
@@ -173,10 +186,13 @@ function draggedLi(e) {
 
 // Deleting a list of completed tasks
 function clearCompleted() {
+    const count = tasks.filter(task => task.completed).length;
     tasks = tasks.filter(task => !task.completed);
 
     saveTasks();
     renderTasks();
+
+    sessionWarning(warning, `${count} completed task cleared`);
 }
 
 // Function: double click you can change the task text
@@ -198,6 +214,7 @@ function editTask(span, index) {
         if (newText) {
             tasks[index].text = newText;
         }
+        sessionWarning(warning, `Task change to ${newText}`);
         saveTasks();
         renderTasks();
     }
@@ -238,22 +255,29 @@ function noTasks() {
 
 // Announcement task status
 function sessionWarning(el, text) {
+    if (text === lastMessage) return;
+    lastMessage = text;
+
     setTimeout(() => {
         el.textContent = text;
         el.classList.remove('fade-out')
         el.classList.add('visible');
-    }, 150);
+    }, 100);
 
     setTimeout(() => {
         el.classList.add('fade-out');
-    }, 3000);
-
-    warning.addEventListener('transitioned', () => {
-        if (el.classList.contains('fade-out')) {
-            el.remove();
-        }
-    });
+    }, 2000);
 };
+
+// Announcement search result
+function announceSearchResults(filtered) {
+    if (!searchText) return;
+    if (filtered.length === 0) {
+        sessionWarning(warning, 'No tasks found');
+    } else {
+        sessionWarning(warning, `${filtered.length} task found`);
+    }
+}
 
 // add task
 addBtn.addEventListener('click', addTask);
@@ -271,14 +295,15 @@ clearInputBtn.addEventListener('click', clearInput);
 // UI filters
 filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-        btn.setAttribute('aria-pressed', 'true');
         currentFilter = btn.dataset.filter;
+
         filterBtns.forEach(b => {
             b.classList.remove('active');
             b.setAttribute('aria-pressed', 'false');
         });
         btn.classList.add('active');
-
+        b.setAttribute('aria-pressed', 'true');
+        sessionWarning(warning, `Showing ${currentFilter} task`);
         renderTasks();
     });
 });
@@ -302,4 +327,22 @@ themeBtn.addEventListener('click', () => {
 searchInput.addEventListener('input', (e) => {
     searchText = e.target.value.toLowerCase();
     renderTasks();
+});
+
+// Clear search
+clearSearchBtn.addEventListener('click', clearSearchInput);
+searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        clearSearchInput();
+    }
+});
+
+// Event delegation. Edit task
+taskList.addEventListener('dblclick', (e) => {
+    const span = e.target.closest('.taskText');
+    if (!span) return;
+
+    const li = span.closest('li');
+    const index = Number(li.dataset.index);
+    editTask(span, index);
 });

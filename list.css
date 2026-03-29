@@ -24,6 +24,7 @@ h1 {
 }
 
 .input-group {
+    margin-top: 10px;
     display: flex;
     gap: 10px;
 }
@@ -75,6 +76,17 @@ li {
     transition: background 1s;
 }
 
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    clip: rect(0 0 0 0);
+}
+
 /* Announcement task status */
 .warning {
     background: #fff3cd;
@@ -107,7 +119,6 @@ li {
 }
 
 #searchInput {
-    margin: 10px 0;
     width: 100%;
     padding: 6px;
 }
