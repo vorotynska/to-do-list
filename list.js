@@ -105,7 +105,6 @@ function createTaskElement(task, index) {
     const clone = template.content.cloneNode(true);
     const li = clone.querySelector('li');
     li.dataset.index = index;
-    li.tabIndex = 0;
     li.draggable = true;
 
     const span = clone.querySelector('.taskText');
@@ -183,7 +182,7 @@ function handleListClick(e) {
         tasks.splice(index, 1);
         // Announcement: task delete
         sessionWarning(warning, 'Task deleted');
-    } else {
+    } else if (checkbox) {
         tasks[index].completed = checkbox.checked;
     }
 
@@ -206,8 +205,11 @@ function draggedLi(e) {
 
 // Dragging with keyboard
 function draggingWithKeyboard(e) {
+    // if it's an interactivf element, do not touch it
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+
     const li = e.target.closest('li');
-    if (!li) return;
+    if (!li || e.target !== li) return;
 
     const index = Number(li.dataset.index);
 
@@ -241,7 +243,7 @@ function draggingWithKeyboard(e) {
 
         if (e.key === 'ArrowUp') {
             e.preventDefault();
-            moveTask(index.index - 1);
+            moveTask(index, index - 1);
         }
     }
 }
@@ -270,7 +272,7 @@ function clearCompleted() {
 
     saveTasks();
     renderTasks();
-
+    clearBtn.focus();
     sessionWarning(warning, `${count} completed task cleared`);
 }
 
@@ -368,6 +370,7 @@ function filterStatusTask(btn) {
     });
     btn.classList.add('active');
     btn.setAttribute('aria-pressed', 'true');
+    btn.focus();
     sessionWarning(warning, `Showing ${currentFilter} task`);
     renderTasks();
 }
