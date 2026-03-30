@@ -39,6 +39,8 @@ let currentFilter = 'all';
 let dragIndex = null;
 let searchText = '';
 let lastMessage = '';
+let keyboardDragIndex = null;
+let isDragginWithKeyboard = false;
 
 //localStorage.removeItem('tasks');
 // Loading tasks from localStorage
@@ -62,6 +64,24 @@ function saveTasks() {
 // Task display function
 function renderTasks() {
     taskList.replaceChildren();
+
+    let filtered = getFilteredTasks();
+
+    const fragment = document.createDocumentFragment();
+
+    filtered.forEach(task => {
+        const index = tasks.indexOf(task);
+        const li = createTaskElement(task, index);
+        fragment.appendChild(li);
+    });
+
+    taskList.appendChild(fragment);
+    announceSearchResults(filtered);
+    updateInfo();
+}
+
+// Flters ansd Search
+function getFilteredTasks() {
     let filtered = tasks;
 
     // Filters
@@ -75,42 +95,41 @@ function renderTasks() {
 
     // Search
     if (searchText) {
-        filtered = tasks.filter(task => task.text.toLowerCase().includes(searchText));
-        announceSearchResults(filtered);
+        filtered = filtered.filter(task => task.text.toLowerCase().includes(searchText));
+    }
+    return filtered;
+}
+
+// Creating one element (the most important)
+function createTaskElement(task, index) {
+    const clone = template.content.cloneNode(true);
+    const li = clone.querySelector('li');
+    li.dataset.index = index;
+    li.tabIndex = 0;
+    li.draggable = true;
+
+    const span = clone.querySelector('.taskText');
+    span.textContent = task.text;
+
+    const deleteBtn = clone.querySelector('.deleteBtn');
+    deleteBtn.setAttribute('aria-label', `Delete task ${task.text}`);
+
+    const checkbox = clone.querySelector('.checkbox');
+    checkbox.checked = task.completed;
+    checkbox.setAttribute('aria-label', `Mark task ${task.text} as completed`);
+
+    if (task.completed) {
+        li.classList.add('completed');
     }
 
-    const fragment = document.createDocumentFragment();
-    filtered.forEach((task) => {
-        const index = tasks.indexOf(task);
-        const clone = template.content.cloneNode(true);
-        const li = clone.querySelector('li');
-        li.dataset.index = index;
-        li.tabIndex = 0;
-        li.draggable = true;
+    if (isDragginWithKeyboard && index === keyboardDragIndex) {
+        li.classList.add('dragging')
+    }
+    li.setAttribute('aria-grabbed', isDragginWithKeyboard && index === keyboardDragIndex);
 
-        const span = clone.querySelector('.taskText');
-        span.textContent = task.text;
+    if (index === tasks.length - 1) highLightingNewTask(li);
 
-        const deleteBtn = clone.querySelector('.deleteBtn');
-        deleteBtn.setAttribute('aria-label', `Delete task ${task.text}`);
-
-        const checkbox = clone.querySelector('input');
-        checkbox.type = 'checkbox';
-        checkbox.setAttribute('aria-label', `Mark task ${task.text} as completed`);
-        checkbox.checked = task.completed;
-
-        //span.addEventListener('dblclick', () => editTask(span, index));
-
-        if (task.completed) {
-            li.classList.add('completed');
-        }
-
-        if (index === tasks.length - 1) highLightingNewTask(li)
-
-        fragment.appendChild(li);
-    });
-    taskList.appendChild(fragment);
-    updateInfo();
+    return li;
 }
 
 // Add task
@@ -140,6 +159,7 @@ function addTask() {
 function clearInput() {
     input.value = '';
     input.focus();
+    sessionWarning(warning, 'Input cleared');
 }
 
 // Clear search input
@@ -182,6 +202,65 @@ function draggedLi(e) {
 
     saveTasks();
     renderTasks();
+}
+
+// Dragging with keyboard
+function draggingWithKeyboard(e) {
+    const li = e.target.closest('li');
+    if (!li) return;
+
+    const index = Number(li.dataset.index);
+
+    // Space take / release
+    if (e.key === ' ') {
+        e.preventDefault();
+        if (!isDragginWithKeyboard) {
+            // take
+            keyboardDragIndex = index;
+            isDragginWithKeyboard = true;
+            sessionWarning(warning, `Item picked up`);
+        } else {
+            // release
+            isDragginWithKeyboard = false;
+            keyboardDragIndex = null;
+            sessionWarning(warning, `Item dropped`);
+        }
+    }
+    // ESC cancellaton
+    if (e.key === 'Escape' && isDragginWithKeyboard) {
+        isDragginWithKeyboard = false;
+        keyboardDragIndex = null;
+        sessionWarning(warning, 'Drag canceled');
+    }
+    // Arrows
+    if (isDragginWithKeyboard) {
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            moveTask(index, index + 1);
+        }
+
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            moveTask(index.index - 1);
+        }
+    }
+}
+
+// Move function with keyboard
+function moveTask(from, to) {
+    if (to < 0 || to >= tasks.length) return;
+
+    const item = tasks.splice(from, 1)[0];
+    tasks.splice(to, 0, item);
+
+    keyboardDragIndex = to;
+
+    saveTasks();
+    renderTasks();
+
+    // return focus
+    const newItem = taskList.querySelector(`[data-index="${to}"]`);
+    if (newItem) newItem.focus();
 }
 
 // Deleting a list of completed tasks
@@ -279,6 +358,20 @@ function announceSearchResults(filtered) {
     }
 }
 
+// Filter status task: all, active, completed
+function filterStatusTask(btn) {
+    currentFilter = btn.dataset.filter;
+
+    filterBtns.forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-pressed', 'false');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-pressed', 'true');
+    sessionWarning(warning, `Showing ${currentFilter} task`);
+    renderTasks();
+}
+
 // add task
 addBtn.addEventListener('click', addTask);
 input.addEventListener('keydown', (e) => {
@@ -295,27 +388,23 @@ clearInputBtn.addEventListener('click', clearInput);
 // UI filters
 filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-        currentFilter = btn.dataset.filter;
-
-        filterBtns.forEach(b => {
-            b.classList.remove('active');
-            b.setAttribute('aria-pressed', 'false');
-        });
-        btn.classList.add('active');
-        b.setAttribute('aria-pressed', 'true');
-        sessionWarning(warning, `Showing ${currentFilter} task`);
-        renderTasks();
+        filterStatusTask(btn)
     });
 });
 
 // Drag & Drop
 taskList.addEventListener('dragstart', e => {
     dragIndex = e.target.dataset.index;
-})
+});
+
 taskList.addEventListener('dragover', e => {
     e.preventDefault();
 });
 taskList.addEventListener('drop', draggedLi)
+
+// Dragging with keybord
+taskList.addEventListener('keydown', draggingWithKeyboard);
+
 
 // Dark Mode
 themeBtn.addEventListener('click', () => {

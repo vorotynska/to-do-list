@@ -139,6 +139,10 @@ li {
     transition: width 0.3s;
 }
 
+.dragging {
+    outline: 2px dashed #4c7ef3;
+}
+
 /* Dark Mode */
 body.dark {
     background: #1e1e1e;
